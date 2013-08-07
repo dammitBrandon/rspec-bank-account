@@ -13,14 +13,12 @@ let(:account) { Account.new("5555555555") }
       end
     end
 
-    context "with invalid account number not enough numbers" do
-      it "attempts to create and initialize with an account number that is less than 10 digits" do
+    context "with invalid account number" do
+      it "Raises an InvalidAccountNumberError for account number that is less than 10 digits" do
         expect { Account.new("111111111")}.to raise_error(InvalidAccountNumberError)
       end
-    end
 
-    context "with invalid account number" do
-      it "attempts to create and initialize with that has non digit characters in it" do
+      it "Raises an InvalidAccountNumberError for account number that has non digit characters" do
         expect { Account.new("111111111a")}.to raise_error(InvalidAccountNumberError)
       end
     end
@@ -45,16 +43,33 @@ let(:account) { Account.new("5555555555") }
   describe "#account_number" do
     context "Tests that the account number should be all *'s except for the last four digits" do
       it "should be ******dddd" do
-        account.acct_number.should =~ /[*]{6}\d{4}/
+        account.acct_number.should =~ /\*{6}\d{4}/
       end
     end
   end
 
   describe "deposit!" do
-
+    context "Tests that account is able to deposit funds and the balance reflects the deposit" do
+      deposit = 10.00
+      it "should add the deposit amount of #{deposit}" do
+        account.deposit!(deposit)
+        account.balance.should eq(deposit)
+      end
+    end
   end
 
   describe "#withdraw!" do
-
+    amount = 10.00
+    context "When withdrawing from an account that has non sufficient funds" do
+      it "should raise OverdraftError" do
+        expect { account.withdraw!(amount) }.to raise_error(OverdraftError)
+      end
+    end
+    context "When a positive balance is present" do
+      it "should successfully withdraw specified amount" do
+        account.deposit!(50)
+        expect {account.withdraw!(amount)}.to change{account.balance}.by(-10)
+      end
+    end
   end
 end
